@@ -1,0 +1,11 @@
+ply
+format ascii 1.0
+comment bbox -31.143192  -30.893037 14.155417  14.380446 -26.019688  -25.987996 
+element vertex 3
+property double x
+property double y
+property double z
+element face 1
+property list uchar int vertex_index
+end_header
+-31.1431922913 14.155417442299999 -26.019687652599998  -31.092527389499999 14.2297687531 -25.989009857199999  -30.89303684235 14.38044595715 -25.9879961014  3 0 1 2  
