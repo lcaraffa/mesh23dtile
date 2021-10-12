@@ -18,12 +18,16 @@ cmap = plt.cm.get_cmap('tab20c', num_colors)
 size_s = 10  # number of characters in the string.
 target_face_num=10000
 
+max_depth = 3
+geom_error = [20,10,5,0]
+
+
 def is_inside_bbox(bbox,pts) :
     return ((pts[0] > bbox[0] and pts[0] < bbox[1]) and
             (pts[1] > bbox[2] and pts[1] < bbox[3]) and
             (pts[2] > bbox[4] and pts[2] < bbox[5]))
 
-def get_bb_centroid(bb) :
+def get_bb_center(bb) :
     return ((bb[1]+bb[0])/2,(bb[3]+bb[2])/2,(bb[5]+bb[4])/2)
 
 def bbox_union(bb1,bb2) :
@@ -34,6 +38,14 @@ def bbox_union(bb1,bb2) :
     return [min(bb1[0],bb2[0]),max(bb1[1],bb2[1]),
             min(bb1[2],bb2[2]),max(bb1[3],bb2[3]),
             min(bb1[4],bb2[4]),max(bb1[5],bb2[5])]
+
+def bbox23Dbox(bb) :
+    cc = list(get_bb_center(bb))
+    cc += [(bb[1]-bb[0])/2,0,0,
+           0,(bb[3]-bb[2])/2,0,
+           0,0,(bb[5]-bb[4])/2]
+    return cc
+
 
 class tree_obj(object):
     def __init__(self, name, position,bbox):
@@ -48,28 +60,34 @@ class tree_obj(object):
 def print_node(depth,str_node,list_sons) :
     print("node depth " + str(depth) + " : " + str_node + " <= " + ' '.join(list_sons))    
 
-def node2dict(bbox,name,children) :
+#def depth2geomerr(depth) :
+    
+    
+def node2dict(bbox,name,children,depth) :
     leaf_dict = {}
-    leaf_dict["boundingVolume"] = { "box": str(bbox) }
+    leaf_dict["boundingVolume"] = { "region": bbox }
+    #leaf_dict["boundingVolume"] = { "box": bbox23Dbox(bbox) }
     leaf_dict["content"] =  { " uri" :  name  }
+    leaf_dict["geometricError"] = geom_error[depth]
     leaf_dict["refine"] = "REPLACE"
     leaf_dict["children"] = children
     return leaf_dict
 
 
 def merge_subtree(node_tt,depth,output_dir) :
-    joint_string = []    
-    node_name = output_dir +  "/"  + str(depth) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k = size_s))  + '.obj'
-
+    joint_string = []
+    node_name = "tiles/" + str(depth) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k = size_s))  + '.b3dm'
+    file_name = output_dir +  node_name
     full_bbox = []
     children_dict = []
     if node_tt.isLeafNode :
         for x in node_tt.data :
-            leaf_dict = node2dict(x.bbox,x.name,[])
-            full_bbox = bbox_union(full_bbox,x.bbox)
+            #leaf_dict = node2dict(x.bbox,x.name,[])
+            #full_bbox = bbox_union(full_bbox,x.bbox)
             joint_string += [x.name]
-            children_dict += [leaf_dict]
+            #children_dict += [leaf_dict]
 
+    
     for bb in node_tt.branches :
         if bb is None :
             continue
@@ -88,11 +106,11 @@ def merge_subtree(node_tt,depth,output_dir) :
             ms.simplification_quadric_edge_collapse_decimation(targetfacenum = target_face_num,preserveboundary = True)
         cc = cmap(random.randrange(num_colors))
         ms.per_face_color_function(r=str(cc[0]*255),g=str(cc[1]*255),b=str(cc[2]*255))
-        ms.save_current_mesh(node_name)
+        ms.save_current_mesh(file_name)
 
-    node_dict = node2dict(full_bbox,node_name,children_dict)
-    print_node(depth,node_name,joint_string)            
-    return  (full_bbox,[node_name],node_dict);
+    node_dict = node2dict(full_bbox,node_name,children_dict,depth)
+    print_node(depth,file_name,joint_string)            
+    return  (full_bbox,[file_name],node_dict);
 
 
 def extract_bbox_form_header(full_path) : 
@@ -118,12 +136,12 @@ def build_3DT(inputs) :
         full_bbox[5] = full_bbox[4] + bbox_len
     print("full bbox :" + str(full_bbox))
 
-    origin = get_bb_centroid(full_bbox)
+    origin = get_bb_center(full_bbox)
     myTree = Octree(
             full_bbox[1] - full_bbox[0],
             origin,
             max_type="depth",
-            max_value=3
+            max_value=max_depth
     )
 
             
@@ -131,7 +149,7 @@ def build_3DT(inputs) :
         if ff.endswith(".ply"):
             full_path = os.path.join(inputs["input_dir"], ff)
             bb2 = extract_bbox_form_header(full_path)
-            tile_center = get_bb_centroid(bb2)
+            tile_center = get_bb_center(bb2)
             if (len(bb2) == 0) :
                 continue;
             do_keep = True
@@ -152,13 +170,18 @@ def build_3DT(inputs) :
         
 
     tile_dic=[]
-    tile_output_dir = inputs["output_dir"] + "/tiles/"
-    Path(tile_output_dir).mkdir(parents=True, exist_ok=True)
+    tile_output_dir = inputs["output_dir"] + "/"
+    Path(tile_output_dir + "/tiles" ).mkdir(parents=True, exist_ok=True)
     (sub_bbox,sub_string,sub_dict) = merge_subtree(myTree.root,0,tile_output_dir)
 
-    json_name = inputs["output_dir"] +  "/tiles.json"    
+    final_dict = {}
+    
+    final_dict["asset"] = { "version" : "1.0" }
+    final_dict["geometricError"] = geom_error[0]
+    final_dict["root"] = sub_dict
+    json_name = inputs["output_dir"] +  "/tileset.json"    
     with open(json_name, 'w') as fp:
-        json.dump(sub_dict, fp)
+        json.dump(final_dict, fp)
 
     
 if __name__ == '__main__':
