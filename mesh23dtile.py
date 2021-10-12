@@ -76,7 +76,7 @@ def node2dict(bbox,name,children,depth) :
 
 def merge_subtree(node_tt,depth,output_dir) :
     joint_string = []
-    node_name = "tiles/" + str(depth) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k = size_s))  + '.b3dm'
+    node_name = "tiles/" + str(depth) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k = size_s))  + '.obj'
     file_name = output_dir +  node_name
     full_bbox = []
     children_dict = []
