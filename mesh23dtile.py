@@ -16,10 +16,10 @@ from octree import *
 num_colors = 20
 cmap = plt.cm.get_cmap('tab20c', num_colors)
 size_s = 10  # number of characters in the string.
-target_face_num=10000
+target_face_num=100000
 
 max_depth = 3
-geom_error = [20,10,5,0]
+geom_error = [100,5,1,0]
 
 
 def is_inside_bbox(bbox,pts) :
@@ -44,7 +44,7 @@ def bbox23Dbox(bb) :
     cc += [(bb[1]-bb[0])/2,0,0,
            0,(bb[3]-bb[2])/2,0,
            0,0,(bb[5]-bb[4])/2]
-    return cc
+    return np.around(cc,2).tolist
 
 
 class tree_obj(object):
@@ -65,9 +65,10 @@ def print_node(depth,str_node,list_sons) :
     
 def node2dict(bbox,name,children,depth) :
     leaf_dict = {}
-    leaf_dict["boundingVolume"] = { "region": bbox }
-    #leaf_dict["boundingVolume"] = { "box": bbox23Dbox(bbox) }
-    leaf_dict["content"] =  { " uri" :  name  }
+    print("bbox:"+str(bbox))
+    #leaf_dict["boundingVolume"] = { "region": bbox }
+    leaf_dict["boundingVolume"] = { "box": bbox23Dbox(bbox) }
+    leaf_dict["content"] =  { "uri" :  name  }
     leaf_dict["geometricError"] = geom_error[depth]
     leaf_dict["refine"] = "REPLACE"
     leaf_dict["children"] = children
@@ -83,7 +84,7 @@ def merge_subtree(node_tt,depth,output_dir) :
     if node_tt.isLeafNode :
         for x in node_tt.data :
             #leaf_dict = node2dict(x.bbox,x.name,[])
-            #full_bbox = bbox_union(full_bbox,x.bbox)
+            full_bbox = bbox_union(full_bbox,x.bbox)
             joint_string += [x.name]
             #children_dict += [leaf_dict]
 
@@ -175,9 +176,27 @@ def build_3DT(inputs) :
     (sub_bbox,sub_string,sub_dict) = merge_subtree(myTree.root,0,tile_output_dir)
 
     final_dict = {}
-    
+    sub_dict["transform"]= [
+        96.86356343768793,
+        24.848542777253734,
+        0,
+        0,
+        -15.986465724980844,
+        62.317780594908875,
+        76.5566922962899,
+        0,
+        19.02322243409411,
+        -74.15554020821229,
+        64.3356267137516,
+        0,
+        1215107.7612304366,
+        -4736682.902037748,
+        4081926.095098698,
+        1
+    ]
+
     final_dict["asset"] = { "version" : "1.0" }
-    final_dict["geometricError"] = geom_error[0]
+    final_dict["geometricError"] = 500
     final_dict["root"] = sub_dict
     json_name = inputs["output_dir"] +  "/tileset.json"    
     with open(json_name, 'w') as fp:
@@ -185,6 +204,7 @@ def build_3DT(inputs) :
 
     
 if __name__ == '__main__':
+    random.seed(10)
     ###### Input Param parsing / setting =============
     parser = argparse.ArgumentParser(description='conv_ori')
     parser.add_argument('--input_dir', default='',
