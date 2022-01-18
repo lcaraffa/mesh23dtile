@@ -119,6 +119,20 @@ def extract_bbox_form_header(full_path) :
     return  [float(i) for i in re.split(r'\s{1,}',list(filter(lambda x: "comment bbox" in x , header_string.split("\n")))[0])[2:][:-1]]
 
 
+"""
+data : dictionnary
+
+Given a dictionnary representing a tileset, apply a -PI/2 rotation around the x axis to every boundingVolume of this tileset.
+"""
+def xRotation(data):
+    [x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4] = data["boundingVolume"]["box"]
+    data["boundingVolume"]["box"] = [x1,-z1,y1,x2,-z2,y2,x3,-z3,y3,x4,-z4,y4]
+    if ("children" in data.keys()):
+        for i in range (len(data["children"])):
+            xRotation(data["children"][i])
+
+
+
 def build_3DT(inputs) :
     full_bbox = []
     if False :
@@ -176,27 +190,28 @@ def build_3DT(inputs) :
     (sub_bbox,sub_string,sub_dict) = merge_subtree(myTree.root,0,tile_output_dir)
 
     final_dict = {}
-    sub_dict["transform"]= [
-        96.86356343768793,
-        24.848542777253734,
-        0,
-        0,
-        -15.986465724980844,
-        62.317780594908875,
-        76.5566922962899,
-        0,
-        19.02322243409411,
-        -74.15554020821229,
-        64.3356267137516,
-        0,
-        1215107.7612304366,
-        -4736682.902037748,
-        4081926.095098698,
-        1
-    ]
+#    sub_dict["transform"]= [
+#        96.86356343768793,
+#        24.848542777253734,
+#        0,
+#        0,
+#        -15.986465724980844,
+#        62.317780594908875,
+#        76.5566922962899,
+#        0,
+#        19.02322243409411,
+#        -74.15554020821229,
+#        64.3356267137516,
+#        0,
+#        1215107.7612304366,
+#        -4736682.902037748,
+#        4081926.095098698,
+#        1
+#    ]
 
     final_dict["asset"] = { "version" : "1.0" }
     final_dict["geometricError"] = 500
+    xRotation(sub_dict)
     final_dict["root"] = sub_dict
     json_name = inputs["output_dir"] +  "/tileset.json"    
     with open(json_name, 'w') as fp:
