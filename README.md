@@ -17,5 +17,8 @@ Available versions: 2023.12.post1, 2023.12, 2022.2.post4, 2022.2.post3, 2022.2.p
 
 ## TODO
 - Read https://github.com/pka/awesome-3d-tiles
+
 - convert obj to gltf 
-  https://github.com/arcplus/ObjConvert
+  - https://github.com/arcplus/ObjConvert
+  - https://github.com/VCityTeam/py3dtilers/tree/maste
+	- https://github.com/VCityTeam/py3dtilers/tree/master/py3dtilers/ObjTiler#obj-tiler
