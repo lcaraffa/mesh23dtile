@@ -15,6 +15,7 @@ in the main dir, it will creates the output in the "output" dir
 pymeshlab (2023.12.post1)
 Available versions: 2023.12.post1, 2023.12, 2022.2.post4, 2022.2.post3, 2022.2.post2, 2022.2, 2021.10, 2021.7, 0.2.1, 0.2, 0.1.9, 0.1.8, 0.1.7
 
-## TODOS
+## TODO
+- Read https://github.com/pka/awesome-3d-tiles
 - convert obj to gltf 
-https://github.com/arcplus/ObjConvert
+  https://github.com/arcplus/ObjConvert
