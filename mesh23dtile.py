@@ -65,9 +65,8 @@ def print_node(depth,str_node,list_sons) :
     
 def node2dict(bbox,name,children,depth) :
     leaf_dict = {}
-    print("bbox:"+str(bbox))
     #leaf_dict["boundingVolume"] = { "region": bbox }
-    leaf_dict["boundingVolume"] = { "box": str(bbox23Dbox(bbox)) }
+    leaf_dict["boundingVolume"] = { "box": str(bbox23Dbox(bbox)()) }
     leaf_dict["content"] =  { "uri" :  str(name)  }
     leaf_dict["geometricError"] = str(geom_error[depth])
     leaf_dict["refine"] = "REPLACE"
