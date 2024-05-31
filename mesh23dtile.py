@@ -19,7 +19,7 @@ size_s = 10  # number of characters in the string.
 target_face_num=100000
 
 max_depth = 3
-geom_error = [100,5,1,0]
+geom_error = [25,5,1,0]
 
 
 def is_inside_bbox(bbox,pts) :
@@ -66,7 +66,7 @@ def print_node(depth,str_node,list_sons) :
 def node2dict(bbox,name,children,depth) :
     leaf_dict = {}
     #leaf_dict["boundingVolume"] = { "region": bbox }
-    leaf_dict["boundingVolume"] = { "box": str(bbox23Dbox(bbox)()) }
+    leaf_dict["boundingVolume"] = { "box": bbox23Dbox(bbox)() }
     leaf_dict["content"] =  { "uri" :  str(name)  }
     leaf_dict["geometricError"] = str(geom_error[depth])
     leaf_dict["refine"] = "REPLACE"
@@ -176,26 +176,26 @@ def build_3DT(inputs) :
 
     final_dict = {}
     sub_dict["transform"]= [
-        96.86356343768793,
-        24.848542777253734,
-        0,
-        0,
-        -15.986465724980844,
-        62.317780594908875,
-        76.5566922962899,
-        0,
-        19.02322243409411,
-        -74.15554020821229,
-        64.3356267137516,
-        0,
-        1215107.7612304366,
-        -4736682.902037748,
-        4081926.095098698,
-        1
+      96.86356343768793,
+      24.848542777253734,
+      0,
+      0,
+      -19.02322243409411,
+      74.15554020821229,
+      -64.3356267137516,
+	0,
+      -15.986465724980844,
+      62.317780594908875,
+      76.5566922962899,
+      0,	
+      1215107.7612304366,
+      -4736682.902037748,
+      4081926.095098698,
+      1
     ]
 
     final_dict["asset"] = { "version" : "1.0" }
-    final_dict["geometricError"] = 500
+    final_dict["geometricError"] = 100
     final_dict["root"] = sub_dict
     json_name = inputs["output_dir"] +  "/tileset.json"    
     with open(json_name, 'w') as fp:
