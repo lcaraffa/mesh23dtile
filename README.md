@@ -15,8 +15,13 @@ To run the example, just run
 ```console
 ./run_example.sh
 ```
-in the main dir, it will creates the output in the "output" dir
+in the main dir, it will creates the output in the "output" 
 
+## On lidar hd 
+check the following example
+```console
+./run_lidarhd.sh
+```
 
 ## TODO
 - Read https://github.com/pka/awesome-3d-tiles
