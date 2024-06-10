@@ -8,3 +8,8 @@ dependencies:
   - pip:
       - pymeshlab==2021.10
       - matplotlib
+      - numpy
+      - pandas
+      - pyproj
+      - plyfile
+      - trimesh
