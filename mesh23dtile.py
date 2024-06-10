@@ -12,6 +12,8 @@ from pathlib import Path
 from datetime import datetime
 import pymeshlab
 from octree import *
+import pyproj
+import trimesh
 
 num_colors = 20
 cmap = plt.cm.get_cmap('tab20c', num_colors)
@@ -19,9 +21,11 @@ size_s = 10  # number of characters in the string.
 target_face_num=100000
 
 max_depth = 3
-geom_error = [25,5,1,0]
+geom_error = [2,0,0,0]
 
-
+transformer = pyproj.Transformer.from_crs("epsg:2154", "epsg:4978", always_xy=True)
+x_shift = 635471.0
+y_shift = 6856430.0
 def is_inside_bbox(bbox,pts) :
     return ((pts[0] > bbox[0] and pts[0] < bbox[1]) and
             (pts[1] > bbox[2] and pts[1] < bbox[3]) and
@@ -39,12 +43,20 @@ def bbox_union(bb1,bb2) :
             min(bb1[2],bb2[2]),max(bb1[3],bb2[3]),
             min(bb1[4],bb2[4]),max(bb1[5],bb2[5])]
 
+def trans_bbox(bb) :
+    
+    xmin_new, ymin_new, zmin_new = transformer.transform(bb[0]+x_shift,bb[2]+y_shift,bb[4])
+    xmax_new, ymax_new, zmax_new = transformer.transform(bb[1]+x_shift,bb[3]+y_shift,bb[5])
+    #import pdb; pdb.set_trace()
+    return [xmax_new, xmin_new, ymin_new,ymax_new, zmin_new, zmax_new]
+
 def bbox23Dbox(bb) :
     cc = list(get_bb_center(bb))
     cc += [(bb[1]-bb[0])/2,0,0,
            0,(bb[3]-bb[2])/2,0,
            0,0,(bb[5]-bb[4])/2]
-    return np.around(cc,2).tolist
+#    import pdb; pdb.set_trace()
+    return np.around(cc,5).tolist()
 
 
 class tree_obj(object):
@@ -65,8 +77,10 @@ def print_node(depth,str_node,list_sons) :
     
 def node2dict(bbox,name,children,depth) :
     leaf_dict = {}
+
+    #import pdb; pdb.set_trace()
     #leaf_dict["boundingVolume"] = { "region": bbox }
-    leaf_dict["boundingVolume"] = { "box": bbox23Dbox(bbox)() }
+    leaf_dict["boundingVolume"] = { "box": bbox23Dbox(trans_bbox(bbox)) }
     leaf_dict["content"] =  { "uri" :  str(name)  }
     leaf_dict["geometricError"] = str(geom_error[depth])
     leaf_dict["refine"] = "REPLACE"
@@ -176,26 +190,26 @@ def build_3DT(inputs) :
 
     final_dict = {}
     sub_dict["transform"]= [
-      96.86356343768793,
-      24.848542777253734,
-      0,
-      0,
-      -19.02322243409411,
-      74.15554020821229,
-      -64.3356267137516,
-	0,
-      -15.986465724980844,
-      62.317780594908875,
-      76.5566922962899,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
       0,	
-      1215107.7612304366,
-      -4736682.902037748,
-      4081926.095098698,
+        0,
+        0,
+        0,
       1
     ]
 
     final_dict["asset"] = { "version" : "1.0" }
-    final_dict["geometricError"] = 100
+    final_dict["geometricError"] = "20"
     final_dict["root"] = sub_dict
     json_name = inputs["output_dir"] +  "/tileset.json"    
     with open(json_name, 'w') as fp:

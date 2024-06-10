@@ -3,7 +3,7 @@ input_dir=/home/LCaraffa/code/spark-ddt-release/outputs/ex_run_lidarhd_crop/app-
 output_dir=${PWD}/output_lidarhd_crop
 
 mkdir -p  ${output_dir}
-#python3  ./mesh23dtile.py --input_dir  ${input_dir} --output_dir ${output_dir} --meshlab_mode python 
+python3  ./mesh23dtile.py --input_dir  ${input_dir} --output_dir ${output_dir} --meshlab_mode python 
 
 
 # Loop through all OBJ files in the input directory
@@ -15,7 +15,7 @@ for obj_file in ${output_dir}/tiles/*.obj; do
     obj23dtiles -i "${filename_we}.obj"  --b3dm
 done
 
-sed -i 's/\.obj/\.b3dm/g' ${output_dir}/tileset.json
+sed -i 's/\.obj/\_trans.b3dm/g' ${output_dir}/tileset.json
 
 # for obj_file in ${output_dir}/tiles/*.obj;do
 #     base_name=$(basename "$obj_file" .obj)
