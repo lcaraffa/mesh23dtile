@@ -48,7 +48,7 @@ def trans_bbox(bb) :
     xmin_new, ymin_new, zmin_new = transformer.transform(bb[0]+x_shift,bb[2]+y_shift,bb[4])
     xmax_new, ymax_new, zmax_new = transformer.transform(bb[1]+x_shift,bb[3]+y_shift,bb[5])
     #import pdb; pdb.set_trace()
-    return [xmax_new, xmin_new, ymin_new,ymax_new, zmin_new, zmax_new]
+    return [xmin_new, xmax_new, ymin_new,ymax_new, zmin_new, zmax_new]
 
 def bbox23Dbox(bb) :
     cc = list(get_bb_center(bb))
