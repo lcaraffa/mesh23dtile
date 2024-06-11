@@ -18,10 +18,11 @@ To run the example, just run
 in the main dir, it will creates the output in the "output" 
 
 ## On lidar hd 
-check the following example
+A minimal example on lidar HD
 ```console
 ./run_lidarhd.sh
 ```
+![buggy result](./doc/res.jpg)
 
 ## TODO
 - Read https://github.com/pka/awesome-3d-tiles
