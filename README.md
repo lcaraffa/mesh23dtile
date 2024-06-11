@@ -17,11 +17,22 @@ To run the example, just run
 ```
 in the main dir, it will creates the output in the "output" 
 
-## On lidar hd 
-A minimal example on lidar HD
+## On lidar hd
+A minimal example on lidar HD stored in './datas/lidar_hd_crop/'
+The result is created in  './output_lidarhd_crop/'
 ```console
 ./run_lidarhd.sh
 ```
+Notes : 
+
+LiDARHD laz file are in epsg:2154 coordinate system.
+The resulting mesh is shifted for numerical stability
+(coords="635471.0x6856430.0" in the lidar_hd.sh file)
+There is actually two mode : 
+- mode_proj=0 that convert obj file in b3dm and add a 4x4 transformation matrix in the tileset.json
+- mode_proj=1 that first convert obj in epsg:4979 and write the bouiding volume as region in epsg:4978 coordinates
+
+The result with mode_proj is actually buddy :
 ![buggy result](./doc/res.jpg)
 
 ## TODO
