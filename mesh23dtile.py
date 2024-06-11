@@ -217,8 +217,6 @@ def build_3DT(inputs) :
     (sub_bbox,sub_string,sub_dict) = merge_subtree(myTree.root,0,tile_output_dir,inputs["coords"])
 
     final_dict = {}
-
-
     
     sub_dict["transform"]= [
         1,
