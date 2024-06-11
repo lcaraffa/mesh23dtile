@@ -15,6 +15,8 @@ from octree import *
 import pyproj
 import trimesh
 
+
+
 num_colors = 20
 cmap = plt.cm.get_cmap('tab20c', num_colors)
 size_s = 10  # number of characters in the string.
@@ -23,9 +25,9 @@ target_face_num=100000
 max_depth = 3
 geom_error = [2,0,0,0]
 
-transformer = pyproj.Transformer.from_crs("epsg:2154", "epsg:4978", always_xy=True)
-x_shift = 635471.0
-y_shift = 6856430.0
+transformer = pyproj.Transformer.from_crs("epsg:2154", "epsg:4979")
+transformer_glob = pyproj.Transformer.from_crs("epsg:2154", "epsg:4978")
+
 def is_inside_bbox(bbox,pts) :
     return ((pts[0] > bbox[0] and pts[0] < bbox[1]) and
             (pts[1] > bbox[2] and pts[1] < bbox[3]) and
@@ -43,18 +45,28 @@ def bbox_union(bb1,bb2) :
             min(bb1[2],bb2[2]),max(bb1[3],bb2[3]),
             min(bb1[4],bb2[4]),max(bb1[5],bb2[5])]
 
-def trans_bbox(bb) :
-    
+def trans_bbox(bb,coords) :
+    x_shift = float(coords.split("x")[0])
+    y_shift = float(coords.split("x")[1])
+    # Loop through all OBJ files in the input directory
     xmin_new, ymin_new, zmin_new = transformer.transform(bb[0]+x_shift,bb[2]+y_shift,bb[4])
     xmax_new, ymax_new, zmax_new = transformer.transform(bb[1]+x_shift,bb[3]+y_shift,bb[5])
-    #import pdb; pdb.set_trace()
+#    import pdb; pdb.set_trace()
     return [xmin_new, xmax_new, ymin_new,ymax_new, zmin_new, zmax_new]
+
+def bbox2region(bb,coords) :
+    x_shift = float(coords.split("x")[0])
+    y_shift = float(coords.split("x")[1])
+    xmin_new, ymin_new, zmin_new = transformer.transform(bb[0]+x_shift,bb[2]+y_shift,bb[4])
+    xmax_new, ymax_new, zmax_new = transformer.transform(bb[1]+x_shift,bb[3]+y_shift,bb[5])
+    return list([ymin_new,xmin_new,ymax_new,xmax_new,zmin_new,zmax_new])
+
 
 def bbox23Dbox(bb) :
     cc = list(get_bb_center(bb))
-    cc += [(bb[1]-bb[0])/2,0,0,
-           0,(bb[3]-bb[2])/2,0,
-           0,0,(bb[5]-bb[4])/2]
+    cc += [abs(bb[1]-bb[0])/2,0,0,
+           0,abs(bb[3]-bb[2])/2,0,
+           0,0,abs(bb[5]-bb[4])/2]
 #    import pdb; pdb.set_trace()
     return np.around(cc,5).tolist()
 
@@ -75,12 +87,16 @@ def print_node(depth,str_node,list_sons) :
 #def depth2geomerr(depth) :
     
     
-def node2dict(bbox,name,children,depth) :
+def node2dict(bbox,name,children,depth,coords) :
     leaf_dict = {}
 
     #import pdb; pdb.set_trace()
     #leaf_dict["boundingVolume"] = { "region": bbox }
-    leaf_dict["boundingVolume"] = { "box": bbox23Dbox(trans_bbox(bbox)) }
+    if coords :
+        leaf_dict["boundingVolume"] = { "region": bbox2region(bbox,coords) }
+    else :
+        leaf_dict["boundingVolume"] = { "box": bbox23Dbox(bbox) }
+    
     leaf_dict["content"] =  { "uri" :  str(name)  }
     leaf_dict["geometricError"] = str(geom_error[depth])
     leaf_dict["refine"] = "REPLACE"
@@ -88,7 +104,7 @@ def node2dict(bbox,name,children,depth) :
     return leaf_dict
 
 
-def merge_subtree(node_tt,depth,output_dir) :
+def merge_subtree(node_tt,depth,output_dir,coords) :
     joint_string = []
     node_name = "tiles/" + str(depth) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k = size_s))  + '.obj'
     file_name = output_dir +  node_name
@@ -105,7 +121,7 @@ def merge_subtree(node_tt,depth,output_dir) :
     for bb in node_tt.branches :
         if bb is None :
             continue
-        (sub_bbox,sub_string,sub_dict) = merge_subtree(bb,depth+1,output_dir)
+        (sub_bbox,sub_string,sub_dict) = merge_subtree(bb,depth+1,output_dir,coords)
         children_dict+= [sub_dict]
         joint_string += sub_string
         full_bbox = bbox_union(full_bbox,sub_bbox)
@@ -122,7 +138,7 @@ def merge_subtree(node_tt,depth,output_dir) :
         ms.per_face_color_function(r=str(cc[0]*255),g=str(cc[1]*255),b=str(cc[2]*255))
         ms.save_current_mesh(file_name)
 
-    node_dict = node2dict(full_bbox,node_name,children_dict,depth)
+    node_dict = node2dict(full_bbox,node_name,children_dict,depth,coords)
     print_node(depth,file_name,joint_string)            
     return  (full_bbox,[file_name],node_dict);
 
@@ -186,9 +202,24 @@ def build_3DT(inputs) :
     tile_dic=[]
     tile_output_dir = inputs["output_dir"] + "/"
     Path(tile_output_dir + "/tiles" ).mkdir(parents=True, exist_ok=True)
-    (sub_bbox,sub_string,sub_dict) = merge_subtree(myTree.root,0,tile_output_dir)
+
+    if inputs["mode_proj"] == '0' :
+        coords  = inputs["coords"]
+        inputs["coords"]=''
+        x_shift = float(coords.split("x")[0])
+        y_shift = float(coords.split("x")[1])
+        xmin_new, ymin_new, zmin_new = transformer_glob.transform(x_shift,y_shift,0)
+    else :
+        xmin_new=0
+        ymin_new=0
+        zmin_new=0
+        
+    (sub_bbox,sub_string,sub_dict) = merge_subtree(myTree.root,0,tile_output_dir,inputs["coords"])
 
     final_dict = {}
+
+
+    
     sub_dict["transform"]= [
         1,
         0,
@@ -201,10 +232,10 @@ def build_3DT(inputs) :
         0,
         0,
         1,
-      0,	
         0,
-        0,
-        0,
+      xmin_new,	
+        ymin_new,
+        zmin_new,
       1
     ]
 
@@ -230,10 +261,17 @@ if __name__ == '__main__':
                         help='print command instead of merging with meshlab')
     parser.add_argument('--mode', default='intersect',
                         help='give the mode, "intersect" => just touchingt, "strict" => the bbox is included')
+    parser.add_argument('--coords', default='',
+                        help='translation coords')
+    parser.add_argument('--mode_proj', default='0',
+                        help='mode_proj')
+    
 
-
+    
     args=parser.parse_args()
     inputs=vars(args)
+
+
     if  args.input_dir and args.output_dir   :
         inputs["input_dir"]= os.path.expanduser(args.input_dir)
         inputs["output_dir"] = args.output_dir

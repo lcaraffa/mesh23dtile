@@ -1,23 +1,33 @@
-input_dir=/home/LCaraffa/code/spark-ddt-release/outputs/ex_run_lidarhd_crop/app-20240610092715-0000_10_06_2024_09_27_31_generated/plydist_coef_mult_lag_seg_lagrange_weight_0_ll_2_cm_5_50_seg_lagrange_weight_10_06_2024_09_29_31_gc_1_049
-
+input_dir=${PWD}/datas/lidar_hd_crop
 output_dir=${PWD}/output_lidarhd_crop
+coords="635471.0x6856430.0"
+#mode_proj=0
+mode_proj=1
 
 mkdir -p  ${output_dir}
-python3  ./mesh23dtile.py --input_dir  ${input_dir} --output_dir ${output_dir} --meshlab_mode python 
+python3  ./mesh23dtile.py --input_dir  ${input_dir} --output_dir ${output_dir} --meshlab_mode python --coords ${coords} --mode_proj ${mode_proj}
 
 
-# Loop through all OBJ files in the input directory
 for obj_file in ${output_dir}/tiles/*.obj; do
     filename_we="${obj_file%.*}"
-    python3 convert_obj.py --input ${obj_file}  --output ${filename_we}_trans.obj
+    python3 convert_obj.py --input ${obj_file}  --output ${filename_we}_trans.obj --coords ${coords} 
     echo $filename_without_extension
-    obj23dtiles -i "${filename_we}_trans.obj"  --b3dm
     obj23dtiles -i "${filename_we}.obj"  --b3dm
+    obj23dtiles -i "${filename_we}_trans.obj"  --b3dm
 done
+case $mode_proj in
+    0)
+        echo "Mode project is 0"
+	sed -i 's/\.obj/\.b3dm/g' ${output_dir}/tileset.json
+	#
+        # Add commands to execute when mode_proj is 0
+        ;;
+    1)
+        echo "Mode project is 1"
+	sed -i 's/\.obj/\_trans.b3dm/g' ${output_dir}/tileset.json
+        # Add commands to execute when mode_proj is 1
+        ;;
+esac
 
-sed -i 's/\.obj/\_trans.b3dm/g' ${output_dir}/tileset.json
 
-# for obj_file in ${output_dir}/tiles/*.obj;do
-#     base_name=$(basename "$obj_file" .obj)
-#     echo "python3 translate_mesh.py --input ${obj_file}  --output ${base_name}_trans.ply"
-# done
+
