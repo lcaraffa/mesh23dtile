@@ -36,6 +36,7 @@ The result with mode_proj is actually buddy :
 ![buggy result](./doc/res.jpg)
 
 ## TODO
+- Read Itowns js stuff by Gerald : https://github.com/LIDAR-HD-IGN/PointsTools/tree/main/src
 - Read https://github.com/pka/awesome-3d-tiles
 
 - convert obj to gltf 
