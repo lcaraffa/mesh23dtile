@@ -32,7 +32,7 @@ There is actually two mode :
 - mode_proj=0 that convert obj file in b3dm and add a 4x4 transformation matrix in the tileset.json
 - mode_proj=1 that first convert obj in epsg:4979 and write the bouiding volume as region in epsg:4978 coordinates
 
-The result with mode_proj is actually buddy :
+The result with mode_proj is actually buggy, need some help! :
 ![buggy result](./doc/res.jpg)
 
 ## TODO
