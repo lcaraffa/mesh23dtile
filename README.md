@@ -34,8 +34,9 @@ There is actually two mode :
 
 The result with mode_proj is actually buggy, need some help! :
 ![buggy result](./doc/res.jpg)
-
 ## TODO
+☐ Solve rotation issue 
+## Note
 - Read Itowns js stuff by Gerald : https://github.com/LIDAR-HD-IGN/PointsTools/tree/main/src
 - Read https://github.com/pka/awesome-3d-tiles
 
