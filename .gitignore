@@ -1,0 +1,11 @@
+#ignore .mtl
+*.mtl
+
+#ignore output
+*.obj
+
+__pycache__
+
+*.crc
+
+*.png
