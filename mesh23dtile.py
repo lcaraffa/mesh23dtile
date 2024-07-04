@@ -289,6 +289,6 @@ if __name__ == '__main__':
 
         
     print("\n=== Params ===  \n" + "\n".join("{} ==> {}".format(k, v) for k, v in inputs.items()))
-    build_3DT(inputs);
+    build_3DT(inputs)
 
 
