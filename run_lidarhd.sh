@@ -22,6 +22,13 @@ echo "begin mesh23tile"
 python3  ./mesh23dtile.py --input_dir  ${input_dir} --output_dir ${output_dir} --meshlab_mode python --coords ${coords} --mode_proj ${mode_proj}
 echo "end mesh23dtile.py"
 
+parent_path="${PWD}"
+for dir in "$parent_path"/*; do
+    if [ -d "$dir"  ] && [[ "$dir" == *3Dtile* ]]; then
+        rm -rf "$dir"
+    fi
+done
+
 # OBJ --> 3Dtile
 if [ -d "${tileset}" ]; then
     rm -rf "${tileset}"
@@ -32,12 +39,15 @@ for obj_file in "${output_dir}/tiles/"*.obj; do
     # mode_proj = 0:
     count=$((count + 1))
     output_tile=${tileset}_${count}
-    obj-tiler -i "$obj_file" --offset ${offset} --crs_in EPSG:${input_crs} --crs_out EPSG:${output_crs} -o ${output_tile}
+    if [ -d "${output_tile}" ]; then
+        rm -rf "${output_tile}"
+    else
+        obj-tiler -i "$obj_file" --offset ${offset} --crs_in EPSG:${input_crs} --crs_out EPSG:${output_crs} -o ${output_tile}
     # TODO: mode_proj = 1
+    fi
 done
 
-parent_path="${PWD}"
-
+#3Dtiles --> MERGE
 merge_path=""
 
 for dir in $parent_path/*; do
@@ -46,8 +56,12 @@ for dir in $parent_path/*; do
     fi
 done
 
-if [ -n "${merge_path}" ]; then
-    tileset-merger --path ${merge_path} -o ${output_merge}
+if [ -d "${output_merge}" ]; then
+        rm -rf "${output_merge}"
 else
-    echo "No '3Dtile' folder find"
+    if [ -n "${merge_path}" ]; then
+        tileset-merger --path ${merge_path} -o ${output_merge}
+    else
+        echo "No '3Dtile' folder find"
+    fi
 fi
