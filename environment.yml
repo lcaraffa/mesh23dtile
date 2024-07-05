@@ -1,9 +1,9 @@
-name: mesh23Dtile
+name: mesh23Dtile2
 channels:
   - defaults
   - conda-forge
 dependencies:
-  - python=3.8
+  - python=3.10
   - pip
   - pip:
       - pymeshlab==2021.10
@@ -13,3 +13,4 @@ dependencies:
       - pyproj
       - plyfile
       - trimesh
+      - vcs+https://github.com/VCityTeam/py3dtilers/commit/b884adfecaa48b22a1c50b911fec89ff1ebd470a#egg=py3dtilers
