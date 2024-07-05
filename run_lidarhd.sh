@@ -9,6 +9,7 @@ mode_proj=0 # convert obj file in b3dm and add a 4x4 transformation matrix in th
 tileset="${PWD}/3Dtile"
 input_crs="2154"
 output_crs="4978"
+output_merge="${PWD}/FINAL_3Dtile"
 
 # PLY --> OBJ
 if [ -d "${output_dir}" ]; then
@@ -27,7 +28,6 @@ if [ -d "${tileset}" ]; then
 fi
 
 count=0
-mkdir -p ${tileset}
 for obj_file in "${output_dir}/tiles/"*.obj; do
     # mode_proj = 0:
     count=$((count + 1))
@@ -35,3 +35,19 @@ for obj_file in "${output_dir}/tiles/"*.obj; do
     obj-tiler -i "$obj_file" --offset ${offset} --crs_in EPSG:${input_crs} --crs_out EPSG:${output_crs} -o ${output_tile}
     # TODO: mode_proj = 1
 done
+
+parent_path="${PWD}"
+
+merge_path=""
+
+for dir in $parent_path/*; do
+    if [ -d "$dir" ] && [[ "$dir" == *3Dtile* ]]; then
+        merge_path+="$dir "
+    fi
+done
+
+if [ -n "${merge_path}" ]; then
+    tileset-merger --path ${merge_path} -o ${output_merge}
+else
+    echo "No '3Dtile' folder find"
+fi
