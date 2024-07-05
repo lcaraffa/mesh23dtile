@@ -26,9 +26,12 @@ if [ -d "${tileset}" ]; then
     rm -rf "${tileset}"
 fi
 
-mkdir -p "${tileset}"
+count=0
+mkdir -p ${tileset}
 for obj_file in "${output_dir}/tiles/"*.obj; do
     # mode_proj = 0:
-    obj-tiler -i "$obj_file" --offset ${offset} --crs_in EPSG:${input_crs} --crs_out EPSG:${output_crs} -o ${tileset}
+    count=$((count + 1))
+    output_tile=${tileset}_${count}
+    obj-tiler -i "$obj_file" --offset ${offset} --crs_in EPSG:${input_crs} --crs_out EPSG:${output_crs} -o ${output_tile}
     # TODO: mode_proj = 1
 done
