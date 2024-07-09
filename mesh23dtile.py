@@ -90,13 +90,14 @@ def print_node(depth,str_node,list_sons) :
 def node2dict(bbox,name,children,depth,coords) :
     leaf_dict = {}
 
-    #import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace() 
     #leaf_dict["boundingVolume"] = { "region": bbox }
     if coords :
         leaf_dict["boundingVolume"] = { "region": bbox2region(bbox,coords) }
     else :
         leaf_dict["boundingVolume"] = { "box": bbox23Dbox(bbox) }
-    
+
+    leaf_dict["raw_bbox"] = { "box" :  bbox }        
     leaf_dict["content"] =  { "uri" :  str(name)  }
     leaf_dict["geometricError"] = str(geom_error[depth])
     leaf_dict["refine"] = "REPLACE"
@@ -106,8 +107,9 @@ def node2dict(bbox,name,children,depth,coords) :
 
 def merge_subtree(node_tt,depth,output_dir,coords) :
     joint_string = []
-    node_name = "tiles/" + str(depth) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k = size_s))  + '.obj'
-    file_name = output_dir +  node_name
+    node_name_obj = "tiles/" + str(depth) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k = size_s))  + '.obj'
+    node_name_ply = "tiles/" + str(depth) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k = size_s))  + '.ply'
+    file_name = output_dir +  node_name_obj
     full_bbox = []
     children_dict = []
     if node_tt.isLeafNode :
@@ -137,8 +139,9 @@ def merge_subtree(node_tt,depth,output_dir,coords) :
         cc = cmap(random.randrange(num_colors))
         ms.per_face_color_function(r=str(cc[0]*255),g=str(cc[1]*255),b=str(cc[2]*255))
         ms.save_current_mesh(file_name)
+        ms.save_current_mesh(output_dir +  node_name_ply)
 
-    node_dict = node2dict(full_bbox,node_name,children_dict,depth,coords)
+    node_dict = node2dict(full_bbox,node_name_obj,children_dict,depth,coords)
     print_node(depth,file_name,joint_string)            
     return  (full_bbox,[file_name],node_dict);
 
