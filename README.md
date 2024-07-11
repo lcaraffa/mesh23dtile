@@ -1,7 +1,6 @@
 # minimal-python-project
 
-A first draft to create a 3D tiles struct from a tiled mesh/
-Does not work actually.
+A quick hack to create a 3D tiles struct from a tiled mesh with bounding box information inside
 
 3D tiles specs
 https://github.com/CesiumGS/3d-tiles
@@ -11,19 +10,14 @@ conda env create --file=environments.yml
 conda activate mesh23Dtile
 
 ## Run example 
-To run the example, just run 
-```console
-./run_example.sh
-```
-in the main dir, it will creates the output in the "output" 
-
-## On lidar hd
 A minimal example on lidar HD stored in './datas/lidar_hd_crop/'
 The result is created in  './output_lidarhd_crop/'
 ```console
-./run_lidarhd.sh
+./run.sh --input_dir datas/lidar_hd_crop/ --xml_file datas/lidar_hd_crop/metadata.xml  --output_dir ./output_lidarhd_crop/
 ```
-Notes : 
+
+
+# Notes : 
 
 We use [Py3DTilers](https://github.com/VCityTeam/py3dtilers) to convert obj_file into 3Dtile (tileset + tileset.json).
 
@@ -37,11 +31,3 @@ There is actually two mode :
 The result with mode_proj:
 ![result](./doc/res.png)
 
-## Note
-- Read Itowns js stuff by Gerald : https://github.com/LIDAR-HD-IGN/PointsTools/tree/main/src
-- Read https://github.com/pka/awesome-3d-tiles
-
-- convert obj to gltf 
-  - https://github.com/arcplus/ObjConvert
-  - https://github.com/VCityTeam/py3dtilers/tree/master
-	- https://github.com/VCityTeam/py3dtilers/tree/master/py3dtilers/ObjTiler#obj-tiler

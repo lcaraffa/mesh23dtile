@@ -16,12 +16,9 @@ def replace_box_values(dd,dpath,depth,list_trans,bbv):
             full_path = dpath + "/" + fname + "/tileset.json"
             fo = open(full_path, 'r')
             data_tile = json.load(fo)
-
             loc_bbox = dd['raw_bbox']['box']
 
-
             if depth == 1 :
-
                 dd['transform'] = data_tile['root']['children'][0]['transform']
                 dd['boundingVolume'] = data_tile['root']['children'][0]['boundingVolume']
                 glob_trans = np.array(data_tile['root']['children'][0]['transform']).reshape([4,4]).T
@@ -29,17 +26,11 @@ def replace_box_values(dd,dpath,depth,list_trans,bbv):
                 list_trans_rec.append(glob_trans)
             else :
 
-
                 local_trans =  np.array(data_tile['root']['children'][0]['transform']).reshape([4,4]).T
-
-
                 glob_trans_loc = local_trans
-                
-                list_trans_rec
                 for mat in list_trans_rec :
                     glob_trans_loc = np.dot(glob_trans_loc, np.linalg.inv(mat))
                 list_trans_rec.append(glob_trans_loc)
-                
                 local_bbv =  np.array(data_tile['root']['children'][0]['boundingVolume']['box'])
                 dd['boundingVolume'] = data_tile['root']['children'][0]['boundingVolume']
                 dd['transform'] = glob_trans_loc.reshape([4,4]).T.reshape(-1).tolist()
@@ -59,14 +50,10 @@ def main(tile_path):
     try:
         with open(tile_path + '/tileset.json', 'r') as file:
             data = json.load(file)
-        
         replace_box_values(data,tile_path,0,[],[])
-        
         with open(tile_path + '/tileset_final.json', 'w') as file:
             json.dump(data, file, indent=4)
         
-
-    
     except FileNotFoundError:
         print(f"File not found: {input_file_path}")
     except json.JSONDecodeError:

@@ -15,16 +15,13 @@ from octree import *
 import pyproj
 import trimesh
 
-
-
 num_colors = 20
 cmap = plt.cm.get_cmap('tab20c', num_colors)
 size_s = 10  # number of characters in the string.
 target_face_num=100000
 
 max_depth = 3
-geom_error = [2,0,0,0]
-
+geom_error = [5,2,1,0]
 transformer = pyproj.Transformer.from_crs("epsg:2154", "epsg:4979")
 transformer_glob = pyproj.Transformer.from_crs("epsg:2154", "epsg:4978")
 
